@@ -10,6 +10,11 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
+// 默认首页重定向到登录页
+Route::get('/', function () {
+    return redirect('/login/index');
+});
+
 Route::get('think', function () {
     return 'hello,ThinkPHP8!';
 });
