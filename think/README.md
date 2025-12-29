@@ -121,3 +121,9 @@
 **最后更新：当前已完成 [后台登录页面]，可以直接使用，下一步将优先开发后台主体及其他内容管理模块。**
 
 如需调整优先级或有新需求，请及时反馈！
+
+# 一键停止所有相关进程
+pkill -f "think-docker.sh run"
+
+# 然后重新启动
+cd /home/admin/tp_system/think && nohup ./think-docker.sh run > think.log 2>&1 &
