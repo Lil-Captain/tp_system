@@ -55,32 +55,58 @@ layui.use(['form', 'upload', 'layer', 'jquery'], function(){
     var layer = layui.layer;
     var $ = layui.$;
     
-    // 初始化富文本编辑器
-    const E = window.wangEditor;
-    const editor = new E('#content');
-    editor.config.uploadImgServer = '/admin/upload/image';
-    editor.config.uploadFileName = 'file';
-    editor.create();
+    var editor = null;
     
-    // 图片上传
-    upload.render({
-        elem: '#uploadBtn',
-        url: '/admin/upload/image',
-        accept: 'images',
-        done: function(res){
-            if(res.code == 0){
-                $('#image').val(res.data.url);
-                $('#imagePreview').html('<img src="' + res.data.url + '" style="max-width: 300px; max-height: 200px;" />');
-                layer.msg('上传成功', {icon: 1});
-            } else {
-                layer.msg(res.msg || '上传失败', {icon: 2});
-            }
+    // 等待 wangEditor 加载完成
+    function initEditor() {
+        if (typeof window.wangEditor === 'undefined') {
+            setTimeout(initEditor, 100);
+            return;
         }
-    });
+        
+        // 初始化富文本编辑器
+        const E = window.wangEditor;
+        editor = new E('#content');
+        editor.config.uploadImgServer = '/admin/upload/image';
+        editor.config.uploadFileName = 'file';
+        editor.create();
+        
+        // 设置编辑器内容
+        {if condition="$info.content"}
+        editor.txt.html('{$info.content}');
+        {/if}
+    }
+    
+    // 初始化编辑器
+    initEditor();
+    
+    // 图片上传（延迟初始化，确保富文本编辑器完全加载后再初始化上传）
+    setTimeout(function(){
+        upload.render({
+            elem: '#uploadBtn',
+            url: '/admin/upload/image',
+            accept: 'images',
+            field: 'file',
+            done: function(res){
+                if(res.code == 0){
+                    $('#image').val(res.data.url);
+                    $('#imagePreview').html('<img src="' + res.data.url + '" style="max-width: 300px; max-height: 200px;" />');
+                    layer.msg('上传成功', {icon: 1});
+                } else {
+                    layer.msg(res.msg || '上传失败', {icon: 2});
+                }
+            },
+            error: function(){
+                layer.msg('上传失败', {icon: 2});
+            }
+        });
+    }, 300);
     
     // 表单提交
     form.on('submit(submitBtn)', function(data){
-        data.field.content = editor.txt.html();
+        if(editor){
+            data.field.content = editor.txt.html();
+        }
         $.post('/admin/company/about', data.field, function(res){
             if(res.code == 0){
                 layer.msg(res.msg, {icon: 1});
@@ -90,11 +116,6 @@ layui.use(['form', 'upload', 'layer', 'jquery'], function(){
         }, 'json');
         return false;
     });
-    
-    // 设置编辑器内容
-    {if condition="$info.content"}
-    editor.txt.html('{$info.content}');
-    {/if}
 });
 </script>
 {/block}

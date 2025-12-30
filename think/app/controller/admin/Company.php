@@ -25,7 +25,6 @@ class Company extends Base
             if ($info) {
                 Db::table('bew_company_info')->where('type', 'intro')->update($data);
             } else {
-                $data['create_time'] = date('Y-m-d H:i:s');
                 Db::table('bew_company_info')->insert($data);
             }
             
@@ -62,7 +61,6 @@ class Company extends Base
             if ($info) {
                 Db::table('bew_company_info')->where('type', 'about')->update($data);
             } else {
-                $data['create_time'] = date('Y-m-d H:i:s');
                 Db::table('bew_company_info')->insert($data);
             }
             
@@ -102,7 +100,6 @@ class Company extends Base
             if ($info) {
                 Db::table('bew_company_info')->where('type', 'contact')->update($data);
             } else {
-                $data['create_time'] = date('Y-m-d H:i:s');
                 Db::table('bew_company_info')->insert($data);
             }
             

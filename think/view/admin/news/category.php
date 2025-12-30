@@ -46,8 +46,8 @@
     </div>
 </div>
 
-<!-- 添加/编辑弹窗 -->
-<div id="categoryForm" style="display: none; padding: 20px;">
+<!-- 弹窗模板（隐藏） -->
+<div id="categoryFormTemplate" style="display: none;">
     <form class="layui-form" lay-filter="categoryForm">
         <input type="hidden" name="action" id="formAction" value="add">
         <input type="hidden" name="id" id="formId">
@@ -88,42 +88,81 @@ layui.use(['form', 'layer', 'jquery'], function(){
     var $ = layui.$;
     
     window.addCategory = function() {
-        $('#formAction').val('add');
-        $('#formId').val('');
-        $('#formName').val('');
-        $('#formSort').val(0);
-        $('input[name="status"][value="1"]').prop('checked', true);
-        form.render();
-        layer.open({
+        var html = $('#categoryFormTemplate').html();
+        var index = layer.open({
             type: 1,
             title: '添加分类',
             area: ['500px', '400px'],
-            content: $('#categoryForm'),
+            content: '<div style="padding: 20px;">' + html + '</div>',
             shadeClose: true,
             closeBtn: 1,
             success: function(layero, index) {
-                // 弹窗打开成功后的回调
+                // 设置表单值
+                layero.find('#formAction').val('add');
+                layero.find('#formId').val('');
+                layero.find('#formName').val('');
+                layero.find('#formSort').val(0);
+                layero.find('input[name="status"][value="1"]').prop('checked', true);
+                
+                // 重新渲染表单
+                form.render();
+                
+                // 绑定提交事件
+                form.on('submit(submitCategory)', function(data){
+                    data.field.action = 'add';
+                    $.post('/admin/news/category', data.field, function(res){
+                        if(res.code == 0){
+                            layer.close(index);
+                            layer.msg(res.msg, {icon: 1}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    }, 'json');
+                    return false;
+                });
             }
         });
     };
     
     window.editCategory = function(id, name, sort, status) {
-        $('#formAction').val('edit');
-        $('#formId').val(id);
-        $('#formName').val(name);
-        $('#formSort').val(sort);
-        $('input[name="status"]').prop('checked', false);
-        $('input[name="status"][value="' + status + '"]').prop('checked', true);
-        form.render();
-        layer.open({
+        var html = $('#categoryFormTemplate').html();
+        var index = layer.open({
             type: 1,
             title: '编辑分类',
             area: ['500px', '400px'],
-            content: $('#categoryForm'),
+            content: '<div style="padding: 20px;">' + html + '</div>',
             shadeClose: true,
             closeBtn: 1,
             success: function(layero, index) {
-                // 弹窗打开成功后的回调
+                // 设置表单值
+                layero.find('#formAction').val('edit');
+                layero.find('#formId').val(id);
+                layero.find('#formName').val(name);
+                layero.find('#formSort').val(sort);
+                layero.find('input[name="status"]').prop('checked', false);
+                layero.find('input[name="status"][value="' + status + '"]').prop('checked', true);
+                
+                // 重新渲染表单
+                form.render();
+                
+                // 绑定提交事件
+                form.on('submit(submitCategory)', function(data){
+                    data.field.action = 'edit';
+                    data.field.id = id;
+                    $.post('/admin/news/category', data.field, function(res){
+                        if(res.code == 0){
+                            layer.close(index);
+                            layer.msg(res.msg, {icon: 1}, function(){
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    }, 'json');
+                    return false;
+                });
             }
         });
     };
@@ -143,19 +182,6 @@ layui.use(['form', 'layer', 'jquery'], function(){
         });
     };
     
-    form.on('submit(submitCategory)', function(data){
-        $.post('/admin/news/category', data.field, function(res){
-            if(res.code == 0){
-                layer.closeAll(); // 关闭所有弹窗
-                layer.msg(res.msg, {icon: 1}, function(){
-                    location.reload();
-                });
-            } else {
-                layer.msg(res.msg, {icon: 2});
-            }
-        }, 'json');
-        return false;
-    });
 });
 </script>
 {/block}

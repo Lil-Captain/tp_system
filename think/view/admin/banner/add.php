@@ -72,6 +72,7 @@ layui.use(['form', 'upload', 'layer', 'jquery'], function(){
         elem: '#uploadBtn',
         url: '/admin/upload/image',
         accept: 'images',
+        field: 'file',
         done: function(res){
             if(res.code == 0){
                 $('#image').val(res.data.url);
